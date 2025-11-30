@@ -90,7 +90,7 @@ def get_sector_performance() -> dict:
 
 # Create the SectorPerformanceAgent
 sector_performance_agent = Agent(
-    model="gemini-2.0-flash-exp",
+    model="gemini-2.0-flash",
     system_instruction="""You are a Sector Performance Agent specializing in market sector analysis.
 
 Your role:

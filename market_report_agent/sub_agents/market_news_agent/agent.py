@@ -57,7 +57,7 @@ def search_general_market_news() -> dict:
 
 # Create the MarketNewsAgent
 market_news_agent = Agent(
-    model="gemini-2.0-flash-exp",
+    model="gemini-2.0-flash",
     system_instruction="""You are a Market News Agent specializing in gathering and summarizing financial news.
 
 Your role:

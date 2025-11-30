@@ -64,7 +64,7 @@ async def generate_report_wrapper() -> dict:
 
 # Create the root agent
 market_report_agent = Agent(
-    model="gemini-2.0-flash-exp",
+    model="gemini-2.0-flash",
     tools=[price_agent_tool, sector_agent_tool, news_agent_tool],
     functions=[
         add_ticker_wrapper,

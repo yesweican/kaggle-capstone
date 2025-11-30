@@ -82,7 +82,7 @@ def get_price_updates(tickers: list[str]) -> dict:
 
 # Create the PriceUpdateAgent
 price_update_agent = Agent(
-    model="gemini-2.0-flash-exp",
+    model="gemini-2.0-flash",
     system_instruction="""You are a Price Update Agent specializing in stock price analysis.
 
 Your role:

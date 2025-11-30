@@ -184,7 +184,7 @@ agent:
   description: "Portfolio management and market analysis agent with price updates, sector performance, and news integration"
   
   # Model Configuration
-  model: "gemini-2.0-flash-exp"
+  model: "gemini-2.0-flash"
   
   # Session Configuration
   session_config:
