@@ -20,31 +20,29 @@ sector_agent_tool = AgentTool(agent=sector_performance_agent)
 news_agent_tool = AgentTool(agent=market_news_agent)
 
 # Portfolio management functions with session state access via ToolContext
-def add_ticker_wrapper(ticker: str, tool_context: ToolContext) -> dict:
+def add_ticker_tool(ticker: str, tool_context: ToolContext) -> dict:
     """Add a ticker to the portfolio."""
-    # Access session state through ToolContext
     session_state = tool_context.state
     result = add_ticker(session_state, ticker)
-    # State changes are automatically saved by ADK
     return result
 
-def delete_ticker_wrapper(ticker: str, tool_context: ToolContext) -> dict:
+def delete_ticker_tool(ticker: str, tool_context: ToolContext) -> dict:
     """Remove a ticker from the portfolio."""
     session_state = tool_context.state
     result = delete_ticker(session_state, ticker)
     return result
 
-def list_tickers_wrapper(tool_context: ToolContext) -> dict:
+def list_tickers_tool(tool_context: ToolContext) -> dict:
     """List all tickers in the portfolio."""
     session_state = tool_context.state
     return list_tickers(session_state)
 
-async def generate_report_wrapper(tool_context: ToolContext) -> dict:
+async def generate_report_tool(tool_context: ToolContext) -> dict:
     """Generate a comprehensive market report."""
     session_state = tool_context.state
     return await generate_report(session_state)
 
-# Create the root agent
+# Create the root agent with all tools
 market_report_agent = Agent(
     name="market_report_agent",
     model="gemini-2.0-flash",
@@ -52,10 +50,10 @@ market_report_agent = Agent(
         price_agent_tool, 
         sector_agent_tool, 
         news_agent_tool,
-        add_ticker_wrapper,
-        delete_ticker_wrapper,
-        list_tickers_wrapper,
-        generate_report_wrapper
+        add_ticker_tool,
+        delete_ticker_tool,
+        list_tickers_tool,
+        generate_report_tool
     ],
     instruction="""You are the MarketReportAgent, a sophisticated portfolio management and market analysis assistant.
 

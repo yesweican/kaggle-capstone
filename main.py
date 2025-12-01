@@ -3,8 +3,6 @@
 # ============================================================================
 import os
 import asyncio
-import traceback
-import inspect
 from dotenv import load_dotenv
 from google.adk.sessions import DatabaseSessionService
 from google.adk.runners import Runner
@@ -50,11 +48,11 @@ async def main():
     print("=" * 60)
     
     # Example: Start a new session ????
-    # session_service.create_session(
-    #    app_name=APP_NAME,
-    #    user_id=user_id,
-    #    session_id=session_id
-    # )
+    session = await session_service.create_session(
+       app_name=APP_NAME,
+       user_id=user_id,
+       session_id=session_id
+    )
     
     print(f"📊 Session ID: {session_id}")
     print("=" * 60)
@@ -134,6 +132,13 @@ async def interactive_runner():
     
     session_id = "interactive_session"
     user_id = "user_interactive"
+
+    # Example: Start a new session ????
+    session = await session_service.create_session(
+       app_name=APP_NAME,
+       user_id=user_id,
+       session_id=session_id
+    )
     
     print("🚀 MarketReportAgent Interactive Mode")
     print("=" * 60)
@@ -144,7 +149,7 @@ async def interactive_runner():
     print("  - Generate report: 'Generate a market report'")
     print("  - Exit: 'quit' or 'exit'")
     print("=" * 60)
-    
+
     while True:
         try:
             user_input = input("\n💬 You: ").strip()
