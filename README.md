@@ -46,7 +46,17 @@ market_report_agent/
     └── deploy.py                   # Deployment script
 """
 
+### Prerequisite #1 - Python Version preferred 3.12
 
+python --version
+
+### Prerequisite #2 - Setup Virtual Environment
+
+python -m venv .venv
+
+### Prerequisite #3 - Install Dependencies
+
+pip install -r requirements.txt
 
 ### Running the Agent
 
