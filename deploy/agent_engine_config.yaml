@@ -1,0 +1,50 @@
+# ============================================================================
+# deploy/agent_engine_config.yaml
+# ============================================================================
+"""
+# Vertex AI Agent Engine Configuration for MarketReportAgent
+
+# Project Configuration
+project_id: "your-project-id"
+location: "us-central1"
+agent_engine_id: "market-report-agent"
+
+# Agent Configuration
+agent:
+  display_name: "Market Report Agent"
+  description: "Portfolio management and market analysis agent"
+  model: "gemini-2.0-flash"
+  
+  # Session Configuration
+  session_config:
+    session_ttl: "3600s"
+    enable_session_persistence: true
+    
+  # Scaling Configuration
+  scaling:
+    min_instances: 1
+    max_instances: 10
+    target_concurrency: 80
+    
+  # Environment Variables
+  environment:
+    GOOGLE_GENAI_USE_VERTEXAI: "TRUE"
+    GOOGLE_CLOUD_PROJECT: "your-project-id"
+    GOOGLE_CLOUD_LOCATION: "us-central1"
+    
+  # Resource Configuration
+  resources:
+    cpu: "2"
+    memory: "4Gi"
+    timeout: "300s"
+    
+  # Monitoring
+  monitoring:
+    enable_logging: true
+    log_level: "INFO"
+    enable_tracing: true
+
+# Security Configuration
+security:
+  service_account: "default"
+"""

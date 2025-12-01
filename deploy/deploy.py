@@ -89,6 +89,7 @@ def create_requirements_for_deployment() -> None:
 google-adk
 yfinance
 python-dotenv
+aiosqlite
 pyyaml
 """
     
@@ -107,9 +108,6 @@ def deploy_agent(config: Dict[str, Any]) -> bool:
     print(f"   Project: {project_id}")
     print(f"   Location: {location}")
     print(f"   Agent ID: {agent_id}")
-    
-    # Note: The actual deployment command depends on the Google ADK CLI
-    # This is a placeholder for the deployment process
     
     try:
         # Example deployment command (adjust based on actual ADK CLI)
