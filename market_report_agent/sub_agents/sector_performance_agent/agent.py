@@ -90,8 +90,10 @@ def get_sector_performance() -> dict:
 
 # Create the SectorPerformanceAgent
 sector_performance_agent = Agent(
+    name="sector_performance_agent",
     model="gemini-2.0-flash",
-    system_instruction="""You are a Sector Performance Agent specializing in market sector analysis.
+    tools=[get_sector_performance],
+    instruction="""You are a Sector Performance Agent specializing in market sector analysis.
 
 Your role:
 - Analyze the GICS 11 sectors using sector ETF performance
@@ -106,5 +108,4 @@ When presenting sector analysis:
 - Keep analysis focused on actionable insights
 
 Format your response as a concise sector performance report with clear sections for leaders and laggards.""",
-    functions=[get_sector_performance]
 )

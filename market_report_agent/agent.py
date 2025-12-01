@@ -3,7 +3,9 @@
 # ============================================================================
 """Root MarketReportAgent that manages portfolio and generates reports"""
 
-from google.adk.agents import Agent, AgentTool
+from google.adk.agents import Agent
+from google.adk.tools.agent_tool import AgentTool
+from google.adk.tools import ToolContext
 from .tools.portfolio_tools import add_ticker, delete_ticker, list_tickers
 from .tools.report_tools import generate_report
 from .sub_agents import (
@@ -13,66 +15,49 @@ from .sub_agents import (
 )
 
 # Wrap sub-agents as AgentTools
-price_agent_tool = AgentTool(
-    agent=price_update_agent,
-    name="price_update_agent",
-    description="Analyzes current price data and performance metrics for portfolio tickers using yfinance"
-)
+price_agent_tool = AgentTool(agent=price_update_agent)
+sector_agent_tool = AgentTool(agent=sector_performance_agent)
+news_agent_tool = AgentTool(agent=market_news_agent)
 
-sector_agent_tool = AgentTool(
-    agent=sector_performance_agent,
-    name="sector_performance_agent",
-    description="Analyzes GICS 11 sector performance and identifies market leaders and laggards"
-)
-
-news_agent_tool = AgentTool(
-    agent=market_news_agent,
-    name="market_news_agent",
-    description="Searches for portfolio-specific and general market news"
-)
-
-# Portfolio management functions with session state access
-def add_ticker_wrapper(ticker: str) -> dict:
+# Portfolio management functions with session state access via ToolContext
+def add_ticker_wrapper(ticker: str, tool_context: ToolContext) -> dict:
     """Add a ticker to the portfolio."""
-    # Note: Session state access will be handled at runtime through agent context
-    session_state = market_report_agent.get_session_state()
+    # Access session state through ToolContext
+    session_state = tool_context.state
     result = add_ticker(session_state, ticker)
-    market_report_agent.save_session_state(session_state)
+    # State changes are automatically saved by ADK
     return result
 
-def delete_ticker_wrapper(ticker: str) -> dict:
+def delete_ticker_wrapper(ticker: str, tool_context: ToolContext) -> dict:
     """Remove a ticker from the portfolio."""
-    session_state = market_report_agent.get_session_state()
+    session_state = tool_context.state
     result = delete_ticker(session_state, ticker)
-    market_report_agent.save_session_state(session_state)
     return result
 
-def list_tickers_wrapper() -> dict:
+def list_tickers_wrapper(tool_context: ToolContext) -> dict:
     """List all tickers in the portfolio."""
-    session_state = market_report_agent.get_session_state()
+    session_state = tool_context.state
     return list_tickers(session_state)
 
-async def generate_report_wrapper() -> dict:
+async def generate_report_wrapper(tool_context: ToolContext) -> dict:
     """Generate a comprehensive market report."""
-    session_state = market_report_agent.get_session_state()
-    return await generate_report(
-        session_state,
-        price_update_agent,
-        sector_performance_agent,
-        market_news_agent
-    )
+    session_state = tool_context.state
+    return await generate_report(session_state)
 
 # Create the root agent
 market_report_agent = Agent(
+    name="market_report_agent",
     model="gemini-2.0-flash",
-    tools=[price_agent_tool, sector_agent_tool, news_agent_tool],
-    functions=[
+    tools=[
+        price_agent_tool, 
+        sector_agent_tool, 
+        news_agent_tool,
         add_ticker_wrapper,
         delete_ticker_wrapper,
         list_tickers_wrapper,
         generate_report_wrapper
     ],
-    system_instruction="""You are the MarketReportAgent, a sophisticated portfolio management and market analysis assistant.
+    instruction="""You are the MarketReportAgent, a sophisticated portfolio management and market analysis assistant.
 
 Your capabilities:
 1. Portfolio Management:

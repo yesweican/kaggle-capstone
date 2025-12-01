@@ -7,7 +7,7 @@ MarketNewsAgent - Searches for relevant market news using Google Search
 from google.adk.agents import Agent
 
 # Note: The actual web search implementation depends on Google ADK's search capabilities
-# This is a placeholder structure - might need to integrate with actual search API
+# This is a placeholder structure - you'll need to integrate with actual search API
 
 def search_portfolio_news(tickers: list[str]) -> dict:
     """
@@ -57,8 +57,10 @@ def search_general_market_news() -> dict:
 
 # Create the MarketNewsAgent
 market_news_agent = Agent(
+    name="market_news_agent",
     model="gemini-2.0-flash",
-    system_instruction="""You are a Market News Agent specializing in gathering and summarizing financial news.
+    tools=[search_portfolio_news, search_general_market_news],
+    instruction="""You are a Market News Agent specializing in gathering and summarizing financial news.
 
 Your role:
 - Search for news related to specific portfolio stocks
@@ -74,5 +76,4 @@ When presenting news:
 - Provide source attribution
 
 Format your response as a clear news digest with sections for portfolio news and general market news.""",
-    functions=[search_portfolio_news, search_general_market_news]
 )

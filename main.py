@@ -4,10 +4,10 @@
 import os
 import asyncio
 from dotenv import load_dotenv
-from google.genai import Client
 from google.adk.sessions import DatabaseSessionService
 from google.adk.runners import Runner
-from market_report_agent.agent import market_report_agent
+from google.genai import types
+from market_report_agent import market_report_agent
 
 # Load environment variables
 load_dotenv()
@@ -18,12 +18,15 @@ async def main():
     # Load environment variables
     load_dotenv()
     
+    # Database URL for SQLite with async driver (aiosqlite)
+    db_url = "sqlite+aiosqlite:///./data/sessions.db"
+    
     # Initialize session service with SQLite database
     session_service = DatabaseSessionService(
-        db_path="data/sessions.db",
+        db_url=db_url,
         # The session service will create the database if it doesn't exist
     )
-
+    
     # Define app name for the runner
     APP_NAME = "market_report_agent"
     
@@ -34,14 +37,13 @@ async def main():
         session_service=session_service
     )
     
+    # Note: No Client parameter needed! 
     # Authentication is handled through environment variables (GOOGLE_API_KEY)
-    # or GOOGLE_CLOUD_PROJECT + GOOGLE_CLOUD_LOCATION
     # or through the agent's model configuration
     
     print("🚀 MarketReportAgent Starting...")
     print("=" * 60)
     
-       
     # Example: Start a new session
     session_id = "user_portfolio_session_001"
     
@@ -59,13 +61,19 @@ async def main():
     for query in queries:
         print(f"\n💬 User: {query}")
         print("-" * 60)
+
+        # Create a types.Content object, specifying the role and including the part
+        content_object = types.Content(
+            role='user',  # Or 'model' if it's an AI response
+            parts=[types.Part(text=query)]
+        )
         
         try:
-            # Run the agent with the query
-            response = await root_agent.run(
+            # Run the agent with the query using Runner
+            response = await runner.run(
                 user_id="user_001",
                 session_id=session_id,
-                message=query
+                new_message=content_object
             )
             
             print(f"🤖 Agent: {response}")
@@ -84,20 +92,25 @@ if __name__ == "__main__":
     # Run the async main function
     asyncio.run(main())
 
-
 # ============================================================================
 # Alternative: Interactive Runner
 # ============================================================================
 async def interactive_runner():
     """Interactive CLI for MarketReportAgent."""
     
-    # Setup (same as main)
+    # Setup
     load_dotenv()
-    api_key = os.getenv("GOOGLE_API_KEY")
-    client = Client(api_key=api_key)
-    session_service = DatabaseSessionService(db_path="data/sessions.db")
+    db_url = "sqlite+aiosqlite:///./data/sessions.db"
+    session_service = DatabaseSessionService(db_url=db_url)
     
-    root_agent = create_market_report_agent(client, session_service)
+    APP_NAME = "market_report_agent"
+    
+    # Create Runner
+    runner = Runner(
+        agent=market_report_agent,
+        app_name=APP_NAME,
+        session_service=session_service
+    )
     
     session_id = "interactive_session"
     user_id = "user_interactive"
@@ -122,11 +135,17 @@ async def interactive_runner():
             
             if not user_input:
                 continue
-            
-            response = await root_agent.run(
+
+            # Create a types.Content object, specifying the role and including the part
+            content_object = types.Content(
+                role='user',  # Or 'model' if it's an AI response
+                parts=[types.Part(text=user_input)]
+            )
+
+            response = await runner.run(
                 user_id=user_id,
                 session_id=session_id,
-                message=user_input
+                new_message=content_object
             )
             
             print(f"\n🤖 Agent: {response}")
@@ -136,3 +155,6 @@ async def interactive_runner():
             break
         except Exception as e:
             print(f"\n❌ Error: {str(e)}")
+
+# To run interactive mode:
+# asyncio.run(interactive_runner())

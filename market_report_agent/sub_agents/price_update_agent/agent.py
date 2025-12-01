@@ -82,8 +82,10 @@ def get_price_updates(tickers: list[str]) -> dict:
 
 # Create the PriceUpdateAgent
 price_update_agent = Agent(
+    name="price_update_agent",
     model="gemini-2.0-flash",
-    system_instruction="""You are a Price Update Agent specializing in stock price analysis.
+    tools=[get_price_updates],
+    instruction="""You are a Price Update Agent specializing in stock price analysis.
 
 Your role:
 - Analyze current price data for provided stock tickers
@@ -97,6 +99,5 @@ When presenting price updates:
 - Include volume context if unusual
 - Keep analysis concise and data-driven
 
-Format your response as a clear, structured price update report.""",
-    functions=[get_price_updates]
+Format your response as a clear, structured price update report."""
 )

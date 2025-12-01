@@ -7,22 +7,20 @@ from typing import Dict, Any
 
 
 async def generate_report(
-    session_state: dict,
-    price_agent,
-    sector_agent,
-    news_agent
+    session_state: dict
 ) -> Dict[str, Any]:
     """
-    Generate a comprehensive market report by orchestrating sub-agents.
+    Generate a comprehensive market report.
+    
+    This is a simplified version that returns the structure.
+    The actual orchestration of sub-agents happens via the main agent's LLM
+    using the AgentTools we've provided.
     
     Args:
         session_state: Current session state containing portfolio
-        price_agent: PriceUpdateAgent instance
-        sector_agent: SectorPerformanceAgent instance
-        news_agent: MarketNewsAgent instance
         
     Returns:
-        Dictionary containing aggregated report data
+        Dictionary with report structure
     """
     portfolio = session_state.get("portfolio", [])
     
@@ -33,38 +31,11 @@ async def generate_report(
             "report": None
         }
     
-    report_sections = {}
-    
-    # 1. Get price updates for portfolio
-    try:
-        price_response = await price_agent.run(
-            message=f"Analyze price updates for these tickers: {', '.join(portfolio)}"
-        )
-        report_sections["price_updates"] = price_response
-    except Exception as e:
-        report_sections["price_updates"] = f"Error fetching price updates: {str(e)}"
-    
-    # 2. Get sector performance (independent of portfolio)
-    try:
-        sector_response = await sector_agent.run(
-            message="Analyze current sector performance and identify leaders and laggards"
-        )
-        report_sections["sector_performance"] = sector_response
-    except Exception as e:
-        report_sections["sector_performance"] = f"Error fetching sector performance: {str(e)}"
-    
-    # 3. Get market news (portfolio-specific + general)
-    try:
-        news_response = await news_agent.run(
-            message=f"Search for news related to these tickers: {', '.join(portfolio)}, and also gather general market news"
-        )
-        report_sections["market_news"] = news_response
-    except Exception as e:
-        report_sections["market_news"] = f"Error fetching market news: {str(e)}"
-    
+    # The agent's LLM will handle calling the sub-agents through AgentTools
+    # This function just validates and structures the request
     return {
         "success": True,
         "portfolio": portfolio,
-        "report_sections": report_sections,
-        "message": "Market report generated successfully"
+        "message": f"Ready to generate report for {len(portfolio)} ticker(s). The agent will now call the price_update_agent, sector_performance_agent, and market_news_agent to gather data.",
+        "instructions": "Call the three sub-agents (price_update_agent, sector_performance_agent, market_news_agent) and synthesize their outputs into a comprehensive market report."
     }
