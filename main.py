@@ -3,11 +3,13 @@
 # ============================================================================
 import os
 import asyncio
+import traceback
+import inspect
 from dotenv import load_dotenv
 from google.adk.sessions import DatabaseSessionService
 from google.adk.runners import Runner
 from google.genai import types
-from market_report_agent import market_report_agent
+from market_report_agent.agent import market_report_agent
 
 # Load environment variables
 load_dotenv()
@@ -20,15 +22,24 @@ async def main():
     
     # Database URL for SQLite with async driver (aiosqlite)
     db_url = "sqlite+aiosqlite:///./data/sessions.db"
+
+    #    DEBUGGING Code
+    print("Agent type:", type(market_report_agent))
+    print("Agent module:", market_report_agent.__module__)
+    print("Agent repr:", repr(market_report_agent))
+  
     
     # Initialize session service with SQLite database
     session_service = DatabaseSessionService(
         db_url=db_url,
         # The session service will create the database if it doesn't exist
     )
+
+    user_id="user_001"
+    session_id = "user_portfolio_session_001"
     
     # Define app name for the runner
-    APP_NAME = "market_report_agent"
+    APP_NAME = market_report_agent.name
     
     # Create Runner to orchestrate agent and session service
     runner = Runner(
@@ -36,7 +47,11 @@ async def main():
         app_name=APP_NAME,
         session_service=session_service
     )
-    
+
+    #DEBUGGING CODE
+    print("Runner agent type:", type(runner.agent))
+    assert id(runner.agent) == id(market_report_agent)
+
     # Note: No Client parameter needed! 
     # Authentication is handled through environment variables (GOOGLE_API_KEY)
     # or through the agent's model configuration
@@ -45,7 +60,12 @@ async def main():
     print("=" * 60)
     
     # Example: Start a new session
-    session_id = "user_portfolio_session_001"
+    session_service.create_session(
+        app_name=APP_NAME,
+        user_id=user_id,
+        session_id=session_id
+    )
+
     
     print(f"📊 Session ID: {session_id}")
     print("=" * 60)
@@ -69,12 +89,15 @@ async def main():
         )
         
         try:
+
             # Run the agent with the query using Runner
-            response = await runner.run(
-                user_id="user_001",
+            async for event in runner.run_async(
+                user_id= user_id,
                 session_id=session_id,
                 new_message=content_object
-            )
+            ):print("Event:", event)
+
+            response = event  # last event
             
             print(f"🤖 Agent: {response}")
             print("-" * 60)
@@ -82,6 +105,7 @@ async def main():
         except Exception as e:
             print(f"❌ Error: {str(e)}")
             print("-" * 60)
+            traceback.print_exc()
     
     print("\n✅ MarketReportAgent Session Complete")
 
@@ -103,7 +127,7 @@ async def interactive_runner():
     db_url = "sqlite+aiosqlite:///./data/sessions.db"
     session_service = DatabaseSessionService(db_url=db_url)
     
-    APP_NAME = "market_report_agent"
+    APP_NAME = market_report_agent.name
     
     # Create Runner
     runner = Runner(
@@ -142,11 +166,13 @@ async def interactive_runner():
                 parts=[types.Part(text=user_input)]
             )
 
-            response = await runner.run(
+            async for event in runner.run_async(
                 user_id=user_id,
                 session_id=session_id,
                 new_message=content_object
-            )
+            ):print("Event:", event)
+
+            response = event  # last event
             
             print(f"\n🤖 Agent: {response}")
             
@@ -155,6 +181,7 @@ async def interactive_runner():
             break
         except Exception as e:
             print(f"\n❌ Error: {str(e)}")
+            traceback.print_exc()
 
 # To run interactive mode:
 # asyncio.run(interactive_runner())
