@@ -46,4 +46,14 @@ market_report_agent/
     └── deploy.py                   # Deployment script
 """
 
-USE python main.py to run the agent
+
+
+### Running the Agent
+
+To run the martket_report_agent:
+
+```bash
+
+python main.py
+
+```
