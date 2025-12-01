@@ -9,26 +9,20 @@ from dotenv import load_dotenv
 from google.adk.sessions import DatabaseSessionService
 from google.adk.runners import Runner
 from google.genai import types
-from market_report_agent.agent import market_report_agent
+from market_report_agent import market_report_agent
 
 # Load environment variables
 load_dotenv()
 
 async def main():
     """Main entry point for MarketReportAgent runner."""
-    
+
     # Load environment variables
     load_dotenv()
     
     # Database URL for SQLite with async driver (aiosqlite)
     db_url = "sqlite+aiosqlite:///./data/sessions.db"
 
-    #    DEBUGGING Code
-    print("Agent type:", type(market_report_agent))
-    print("Agent module:", market_report_agent.__module__)
-    print("Agent repr:", repr(market_report_agent))
-  
-    
     # Initialize session service with SQLite database
     session_service = DatabaseSessionService(
         db_url=db_url,
@@ -48,10 +42,6 @@ async def main():
         session_service=session_service
     )
 
-    #DEBUGGING CODE
-    print("Runner agent type:", type(runner.agent))
-    assert id(runner.agent) == id(market_report_agent)
-
     # Note: No Client parameter needed! 
     # Authentication is handled through environment variables (GOOGLE_API_KEY)
     # or through the agent's model configuration
@@ -59,13 +49,12 @@ async def main():
     print("🚀 MarketReportAgent Starting...")
     print("=" * 60)
     
-    # Example: Start a new session
-    session_service.create_session(
-        app_name=APP_NAME,
-        user_id=user_id,
-        session_id=session_id
-    )
-
+    # Example: Start a new session ????
+    # session_service.create_session(
+    #    app_name=APP_NAME,
+    #    user_id=user_id,
+    #    session_id=session_id
+    # )
     
     print(f"📊 Session ID: {session_id}")
     print("=" * 60)
@@ -91,13 +80,20 @@ async def main():
         try:
 
             # Run the agent with the query using Runner
-            async for event in runner.run_async(
-                user_id= user_id,
+            events = runner.run(
+                user_id=user_id,
                 session_id=session_id,
                 new_message=content_object
-            ):print("Event:", event)
+            )
 
-            response = event  # last event
+            Response = None
+            # Process events to get the final response
+            for event in events:
+                if event.is_final_response():
+                    response = event.content.parts[0].text
+                    print(f"🤖 Agent: {response}")
+                    break
+            print("-" * 60)
             
             print(f"🤖 Agent: {response}")
             print("-" * 60)
@@ -166,13 +162,20 @@ async def interactive_runner():
                 parts=[types.Part(text=user_input)]
             )
 
-            async for event in runner.run_async(
+            # Run the agent
+            events = runner.run(
                 user_id=user_id,
                 session_id=session_id,
                 new_message=content_object
-            ):print("Event:", event)
-
-            response = event  # last event
+            )
+            
+            Response = None
+            # Process events to get the final response
+            for event in events:
+                if event.is_final_response():
+                    response = event.content.parts[0].text
+                    print(f"\n🤖 Agent: {response}")
+                    break
             
             print(f"\n🤖 Agent: {response}")
             
