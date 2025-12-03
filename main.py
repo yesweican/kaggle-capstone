@@ -99,7 +99,6 @@ async def main():
         except Exception as e:
             print(f"❌ Error: {str(e)}")
             print("-" * 60)
-            traceback.print_exc()
     
     print("\n✅ MarketReportAgent Session Complete")
 
@@ -189,7 +188,6 @@ async def interactive_runner():
             break
         except Exception as e:
             print(f"\n❌ Error: {str(e)}")
-            traceback.print_exc()
 
 # To run interactive mode:
 # asyncio.run(interactive_runner())
