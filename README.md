@@ -54,7 +54,11 @@ python --version
 
 python -m venv .venv
 
-### Prerequisite #3 - Install Dependencies
+### Prerequisite #3 - Activate virtual environment
+
+.venv\scripts\activate
+
+### Prerequisite #4 - Install Dependencies
 
 pip install -r requirements.txt
 
